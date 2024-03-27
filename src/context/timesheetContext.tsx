@@ -1,6 +1,9 @@
-import { createContext, useEffect, useState, SetStateAction, Dispatch } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { createContext, useEffect, useState, SetStateAction, Dispatch, ReactNode } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { LoginObj } from "../components/loginForm";
+import { RegisterObj } from "../components/registerForm";
 
 export interface TimesheetContextInterface {
     jwt: string,
@@ -12,9 +15,21 @@ export interface TimesheetContextInterface {
     username: string,
     setUsername: Dispatch<SetStateAction<string>>,
     programs: object[],
-    setPrograms: Dispatch<SetStateAction<unknown>>,
+    setPrograms: Dispatch<SetStateAction<object[]>>,
     entries: object[],
-    setEntries: Dispatch<SetStateAction<unknown>>
+    setEntries: Dispatch<SetStateAction<object[]>>,
+    login: (user: LoginObj) => Promise<boolean>,
+    register: (user: RegisterObj) => Promise<boolean>,
+    getUser: () => Promise<boolean>,
+    updateUser: (userUpdate: object) => Promise<boolean>,
+    getPrograms: () => Promise<boolean>,
+    getEntries: () => Promise<boolean>,
+    createProgram: (program: object) => Promise<boolean>,
+    createEntry: (entry: object) => Promise<boolean>,
+    updateProgram: (program: object, programId: number) => Promise<boolean>,
+    updateEntry: (entry: object, entryId: number) => Promise<boolean>,
+    deleteProgram: (programId: number) => Promise<boolean>,
+    deleteEntry: (entryId: number) => Promise<boolean>
 }
 
 const TimesheetContext = createContext<TimesheetContextInterface> ({
@@ -29,12 +44,32 @@ const TimesheetContext = createContext<TimesheetContextInterface> ({
     entries: [],
     setEntries: () => {},
     username: '',
-    setUsername: () => {}
-});
+    setUsername: () => {},
+    login: async (user: LoginObj) => false,
+    register: async (user: RegisterObj) => false,
+    getUser: async () => false,
+    updateUser: async (userUpdate: object) => false,
+    getPrograms: async () => false,
+    getEntries: async () => false,
+    createProgram: async (program: object) => false,
+    createEntry: async (entry: object) => false,
+    updateProgram: async (program: object, programId: number) => false,
+    updateEntry: async (entry: object, entryId: number) => false,
+    deleteProgram: async (programId: number) => false,
+    deleteEntry: async (entryId: number) => false
+}); 
 
 export interface Props {
-    children: unknown;
+    children: ReactNode;
 }
+
+interface CustomJwtPayload {
+    sub: string; 
+    roles: string[];
+    id: number;
+    iat: number;
+    exp: number;
+  }
 
 const TimesheetProvider = (props: Props) => {
     const [jwt, setJwt] = useState('');
@@ -46,11 +81,17 @@ const TimesheetProvider = (props: Props) => {
 
     useEffect(() => {
         if (jwt) {
-            const decoded = jwtDecode(jwt);
-            console.log(decoded);
-            //assign admin, userID, username  
+          const decoded = jwtDecode<CustomJwtPayload>(jwt);
+          console.log(decoded);
+          if (decoded.roles.includes('USER')) {
+            setAdmin(false);
+          } else {
+            setAdmin(true);
+          }
+          setUserId(decoded.id);
+          setUsername(decoded.sub);
         }
-    }, [jwt])
+      }, [jwt]);
 
     const server = axios.create({
         headers: {
@@ -59,27 +100,35 @@ const TimesheetProvider = (props: Props) => {
         }
     });
     
-    const serverUrl = 'https://localhost:8080';
+    const serverUrl = 'http://localhost:8080';
 
-    const login = async (user: object) => {
+    const login = async (user: LoginObj): Promise<boolean> => {
         try {
             const url = serverUrl + '/authenticate';
             const response = await server.post(url, user);
-            setJwt(JSON.parse(response.data));
-            
+            console.log(response);
+            setJwt(response.data.jwt);
+            return true;
         } catch (error) {
             console.error('Error authenticating user:', error);
+            return false;
         }
     }
 
-    const register = async(user:object) => {
+    const register = async(user:RegisterObj) => {
         try {
             const url = serverUrl + '/users/register';
             const response = await server.post(url, user);
             console.log(response);
-            //login with new user
+            const obj:LoginObj = {
+                username: response.data.email,
+                password: user.password
+            }
+            await login(obj);
+            return true;
         } catch(error) {
             console.error('Error with registration:', error);
+            return false;
         }
     }
 
@@ -87,8 +136,10 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + `users/${userId}`;
             const response = await server.get(url);
+            return true;
         } catch(error) {
             console.error('Error fetching user:', error);
+            return false;
         }
     }
 
@@ -96,9 +147,11 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + `users/${userId}`;
             const response = await server.put(url, userUpdate);
+            return true;
             //update state if changed ?
         } catch(error) {
             console.error('Error updating user', error);
+            return false;
         }
     }
 
@@ -106,9 +159,11 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + '/api/programs';
             const response = await server.get(url);
-            //set programs
+            setPrograms(response.data)
+            return true;
         } catch(error) {
             console.error('Error fetching programs', error);
+            return false;
         }
     }
 
@@ -116,9 +171,12 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + '/api/timesheetEntries';
             const response = await server.get(url);
-            //set entries
+            console.log(response);
+            setEntries(response.data)
+            return true;
         } catch(error) {
             console.error('Error fetching entries', error);
+            return false;
         }
     }
 
@@ -126,9 +184,11 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + '/api/programs';
             const response = await server.post(url, program);
+            return true;
             // re fetch programs
         } catch(error) {
             console.error('Error creating program:', error);
+            return false;
         }
     }
 
@@ -136,9 +196,11 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + '/api/timesheetEntries';
             const response = await server.post(url, entry);
+            return true;
             // re fetch entries
         } catch(error) {
             console.error('Error creating entry:', error);
+            return false;
         }
     }
 
@@ -146,9 +208,11 @@ const TimesheetProvider = (props: Props) => {
         try {   
             const url = serverUrl + `/api/programs/${programId}`;
             const response = await server.put(url, program);
+            return true;
             // re fetch programs
         } catch(error) {
             console.error('Error updating program:', error);
+            return false;
         }
     }
 
@@ -156,9 +220,11 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + `/api/timesheetEntries/${entryId}`;
             const response = await server.post(url, entry);
+            return true;
             // re fetch entries
         } catch(error) {
             console.error('Error updating entry:', error);
+            return false;
         }
     }
 
@@ -166,9 +232,11 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + `/api/timesheetEntries/${entryId}`;
             const response = await server.delete(url)
+            return true;
             //refetch
         } catch(error) {
             console.error('Error deleting entry:', error);
+            return false;
         }
     }
 
@@ -176,14 +244,16 @@ const TimesheetProvider = (props: Props) => {
         try {
             const url = serverUrl + `/api/programs/${programId}`;
             const response = await server.delete(url)
+            return true;
             //refetch
         } catch(error) {
             console.error('Error deleting entries:', error);
+            return false;
         }
     }
 
     return(
-        <TimesheetContext.Provider value={{jwt, setJwt, admin, setAdmin, userId, setUserId, entries, setEntries, programs, setPrograms, username, setUsername}}>{props.children}</TimesheetContext.Provider>
+        <TimesheetContext.Provider value={{updateUser, updateEntry, updateProgram, deleteEntry, deleteProgram, getEntries, getPrograms, createEntry, createProgram, getUser, register, login, jwt, setJwt, admin, setAdmin, userId, setUserId, entries, setEntries, programs, setPrograms, username, setUsername}}>{props.children}</TimesheetContext.Provider>
     )
 }
 
