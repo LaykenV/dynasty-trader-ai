@@ -74,7 +74,7 @@ const RegisterForm = () => {
                     {...form.getInputProps('email')}/>
                 <TextInput
                     label='Username'
-                    placeholder='Your username'
+                    placeholder='FirstName.LastName'
                     {...form.getInputProps('username')}/>
                 <PasswordInput
                     label='Password'

@@ -26,7 +26,8 @@ const LoginPage = () => {
     };
 
     return(
-        <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'100vh', width:'100vw'}}>
+        <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'100vh', width:'100vw', flexDirection:'column'}}>
+            <div style={{fontSize:'xx-large', paddingBottom:'70px'}}>Zyxware Technologies Timesheet</div>
             <div style={{width:'600px', height: '350px', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', border:'2px green solid'}}>
                 <div style={{height:'10%', display:'flex', width:'100%'}}>
                     <div onClick={() => {setNewUser(false)}} style={newUser ? inactiveTabStyle : activeTabStyle}>Log In</div>

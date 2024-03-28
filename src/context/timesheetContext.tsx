@@ -4,6 +4,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { LoginObj } from "../components/loginForm";
 import { RegisterObj } from "../components/registerForm";
+import { Entry } from "../pages/dashboard";
 
 export interface TimesheetContextInterface {
     jwt: string,
@@ -16,18 +17,18 @@ export interface TimesheetContextInterface {
     setUsername: Dispatch<SetStateAction<string>>,
     programs: object[],
     setPrograms: Dispatch<SetStateAction<object[]>>,
-    entries: object[],
-    setEntries: Dispatch<SetStateAction<object[]>>,
+    entries: Entry[],
+    setEntries: Dispatch<SetStateAction<Entry[]>>,
     login: (user: LoginObj) => Promise<boolean>,
     register: (user: RegisterObj) => Promise<boolean>,
     getUser: () => Promise<boolean>,
     updateUser: (userUpdate: object) => Promise<boolean>,
     getPrograms: () => Promise<boolean>,
-    getEntries: () => Promise<boolean>,
+    getEntries: (userId:number) => Promise<boolean>,
     createProgram: (program: object) => Promise<boolean>,
-    createEntry: (entry: object) => Promise<boolean>,
+    createEntry: (entry: Entry) => Promise<boolean>,
     updateProgram: (program: object, programId: number) => Promise<boolean>,
-    updateEntry: (entry: object, entryId: number) => Promise<boolean>,
+    updateEntry: (entry: Entry, entryId: number) => Promise<boolean>,
     deleteProgram: (programId: number) => Promise<boolean>,
     deleteEntry: (entryId: number) => Promise<boolean>
 }
@@ -50,11 +51,11 @@ const TimesheetContext = createContext<TimesheetContextInterface> ({
     getUser: async () => false,
     updateUser: async (userUpdate: object) => false,
     getPrograms: async () => false,
-    getEntries: async () => false,
+    getEntries: async (userId:number) => false,
     createProgram: async (program: object) => false,
-    createEntry: async (entry: object) => false,
+    createEntry: async (entry: Entry) => false,
     updateProgram: async (program: object, programId: number) => false,
-    updateEntry: async (entry: object, entryId: number) => false,
+    updateEntry: async (entry: Entry, entryId: number) => false,
     deleteProgram: async (programId: number) => false,
     deleteEntry: async (entryId: number) => false
 }); 
@@ -76,7 +77,7 @@ const TimesheetProvider = (props: Props) => {
     const [admin, setAdmin] = useState(false);
     const [userId, setUserId] = useState(0);
     const [programs, setPrograms] = useState([] as object[]);
-    const [entries, setEntries] = useState([] as object[]);
+    const [entries, setEntries] = useState([] as Entry[]);
     const [username, setUsername] = useState('');
 
     useEffect(() => {
@@ -167,9 +168,9 @@ const TimesheetProvider = (props: Props) => {
         }
     }
 
-    const getEntries = async() => {
+    const getEntries = async(userId:number) => {
         try {
-            const url = serverUrl + '/api/timesheetEntries';
+            const url = serverUrl + `/api/timesheetEntries/users/${userId}`;
             const response = await server.get(url);
             console.log(response);
             setEntries(response.data)
@@ -192,7 +193,7 @@ const TimesheetProvider = (props: Props) => {
         }
     }
 
-    const createEntry = async(entry:object) => {
+    const createEntry = async(entry:Entry) => {
         try {
             const url = serverUrl + '/api/timesheetEntries';
             const response = await server.post(url, entry);
@@ -216,7 +217,7 @@ const TimesheetProvider = (props: Props) => {
         }
     }
 
-    const updateEntry = async(entry:object, entryId:number) => {
+    const updateEntry = async(entry:Entry, entryId:number) => {
         try {
             const url = serverUrl + `/api/timesheetEntries/${entryId}`;
             const response = await server.post(url, entry);

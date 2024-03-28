@@ -5,7 +5,10 @@ import LoginPage from './pages/loginPage.tsx';
 import Dashboard from './pages/dashboard.tsx';
 import { TimesheetProvider } from './context/timesheetContext.tsx';
 import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css'
 import { MantineProvider } from '@mantine/core';
+import Layout from './pages/layout.tsx';
+import AccountPage from './pages/account.tsx';
 
 const router = createBrowserRouter([
   {
@@ -14,7 +17,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/dashboard',
-    element: <Dashboard></Dashboard>
+    element: <Layout><Dashboard></Dashboard></Layout>
+  },
+  {
+    path: '/account',
+    element: <Layout><AccountPage></AccountPage></Layout>
   }
 ]);
 
