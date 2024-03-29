@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { TimesheetContext } from "../context/timesheetContext";
 import { useDisclosure } from "@mantine/hooks";
-import { Modal, Button, NumberInput, NativeSelect } from "@mantine/core";
+import { Modal, Button, NumberInput, NativeSelect, TextInput } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 
@@ -15,11 +15,33 @@ import { useForm } from "@mantine/form";
     user: number
 }
 
+export interface NewEntry {
+    date: string,
+    description: string,
+    hours: number,
+    program: number,
+    user: number
+}
+
+export interface Program {
+    createdAt: string,
+    description: string,
+    name: string,
+    programId: number,
+    updatedAt: string
+}
+
+interface formObj {
+    program: string,
+    hours: number, 
+    description: string
+}
 
 const Dashboard = () => {
-    const {jwt, userId, getEntries, getPrograms, programs, entries} = useContext(TimesheetContext);
+    const {jwt, userId, getEntries, getPrograms, programs, entries, createEntry} = useContext(TimesheetContext);
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-
+    const [entryOnSelectedDate, setEntryOnSelectedDate] = useState({} as Entry);
+    
     async function getData() {
         await getPrograms();
         await getEntries(userId);
@@ -35,19 +57,38 @@ const Dashboard = () => {
     useEffect(() => {
         console.log(entries);
         console.log(programs);
+
         
     }, [entries])
 
-    const findEntryByDate = (date:string, arr:Entry[]) => {
-        return arr.find(obj => obj.date === date);
+    const findEntryHoursByDate = (date:string, arr:Entry[]) => {
+        const entry = arr.find(obj => obj.date === date);
+        return entry?.hours;
     }
 
+    const findEntryDescriptionByDate = (date:string, arr:Entry[]) => {
+        const entry = arr.find(obj => obj.date === date);
+        return entry?.description;
+    }
+
+    const findEntryProgramByDate = (date:string, arr:Entry[], programArr:Program[]) => {
+        const entry = arr.find(obj => obj.date === date);
+        const program = programArr.find(obj => obj.programId === entry?.program);
+        return program?.name;
+    }
+
+    const findProgramIdbyName = (programName: string, programs: Program[]): number => {
+        const prog = programs.find(obj => obj.name === programName);
+        const id = prog?.programId;
+        return id ?? 0; // Return 0 or any appropriate default value if programId is undefined
+    }
     
 
     const form = useForm({
         initialValues: {
-            hoursWorked: {},
-            program: 'React'
+            hours: findEntryHoursByDate(formatDateIgnoreTimezone(selectedDate), entries) || 0,
+            program: findEntryProgramByDate(formatDateIgnoreTimezone(selectedDate), entries, programs) || '',
+            description: findEntryDescriptionByDate(formatDateIgnoreTimezone(selectedDate), entries) || ''
         }
     })
 
@@ -63,25 +104,44 @@ const Dashboard = () => {
         
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     }
+
+    const convertFormToEntry = (values:formObj) => {
+        const obj:NewEntry = {
+            hours: values.hours,
+            description: values.description,
+            program: findProgramIdbyName(values.program, programs),
+            date: formatDateIgnoreTimezone(selectedDate),
+            user: userId
+        }
+        return obj;
+    }
+
+    const CreateNewEntry = async (values:NewEntry) => {
+        const isSuccess = await createEntry(values);
+        return console.log(isSuccess);
+        
+        //success or failure banner
+    }
     
     useEffect(() => {
         if (selectedDate) {
-            console.log(findEntryByDate(formatDateIgnoreTimezone(selectedDate), entries));
-            
-            console.log(formatDateIgnoreTimezone(selectedDate));
+            console.log(findEntryHoursByDate(formatDateIgnoreTimezone(selectedDate), entries));
+            console.log(findEntryProgramByDate(formatDateIgnoreTimezone(selectedDate), entries, programs));
         }
+        form.setValues({hours: findEntryHoursByDate(formatDateIgnoreTimezone(selectedDate), entries) || 0, program: findEntryProgramByDate(formatDateIgnoreTimezone(selectedDate), entries, programs) || ''})
     }, [selectedDate]);
     
 
     return(
         <div style={{height:'100%', width:'100%', display:'flex', flexDirection:'column', justifyContent:'space-around', alignItems:'center'}}>
                 <DatePicker value={selectedDate} onChange={setSelectedDate} size="md"></DatePicker>
-                <form style={{display:'flex', flexDirection:'column', justifyContent:'space-around', flexGrow:1}}>
+                <form style={{display:'flex', flexDirection:'column', justifyContent:'space-around', flexGrow:1}} onSubmit={form.onSubmit((values) => CreateNewEntry(convertFormToEntry(values)))}>
                     <div style={{display:'flex', width:'100%', justifyContent:'space-around'}}>
-                        <NumberInput label='How many hours did you work on this day?' {...form.getInputProps('hoursWorked')}/>
-                        <NativeSelect label="Which Program did you work on this day?" data={['React', 'Angular', 'Vue']} {...form.getInputProps('program')}/>
+                        <NumberInput label='How many hours did you work on this day?' {...form.getInputProps('hours')}/>
+                        <NativeSelect label="Which Program did you work on this day?" data={programs.map(obj => obj.name)} {...form.getInputProps('program')}/>
+                        <TextInput label='Description' placeholder="Write your description as needed" {...form.getInputProps('description')}/>
                     </div>
-                    <Button>Submit Timesheet Entry</Button>
+                    <Button type="submit">Submit Timesheet Entry</Button>
                 </form>
         </div>
     )

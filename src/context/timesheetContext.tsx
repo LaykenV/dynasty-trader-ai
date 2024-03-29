@@ -4,7 +4,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { LoginObj } from "../components/loginForm";
 import { RegisterObj } from "../components/registerForm";
-import { Entry } from "../pages/dashboard";
+import { Entry, NewEntry, Program } from "../pages/dashboard";
 
 export interface TimesheetContextInterface {
     jwt: string,
@@ -15,8 +15,8 @@ export interface TimesheetContextInterface {
     setUserId: Dispatch<SetStateAction<number>>,
     username: string,
     setUsername: Dispatch<SetStateAction<string>>,
-    programs: object[],
-    setPrograms: Dispatch<SetStateAction<object[]>>,
+    programs: Program[],
+    setPrograms: Dispatch<SetStateAction<Program[]>>,
     entries: Entry[],
     setEntries: Dispatch<SetStateAction<Entry[]>>,
     login: (user: LoginObj) => Promise<boolean>,
@@ -25,9 +25,9 @@ export interface TimesheetContextInterface {
     updateUser: (userUpdate: object) => Promise<boolean>,
     getPrograms: () => Promise<boolean>,
     getEntries: (userId:number) => Promise<boolean>,
-    createProgram: (program: object) => Promise<boolean>,
-    createEntry: (entry: Entry) => Promise<boolean>,
-    updateProgram: (program: object, programId: number) => Promise<boolean>,
+    createProgram: (program: Program) => Promise<boolean>,
+    createEntry: (entry: NewEntry) => Promise<boolean>,
+    updateProgram: (program: Program, programId: number) => Promise<boolean>,
     updateEntry: (entry: Entry, entryId: number) => Promise<boolean>,
     deleteProgram: (programId: number) => Promise<boolean>,
     deleteEntry: (entryId: number) => Promise<boolean>
@@ -52,9 +52,9 @@ const TimesheetContext = createContext<TimesheetContextInterface> ({
     updateUser: async (userUpdate: object) => false,
     getPrograms: async () => false,
     getEntries: async (userId:number) => false,
-    createProgram: async (program: object) => false,
-    createEntry: async (entry: Entry) => false,
-    updateProgram: async (program: object, programId: number) => false,
+    createProgram: async (program: Program) => false,
+    createEntry: async (entry: NewEntry) => false,
+    updateProgram: async (program: Program, programId: number) => false,
     updateEntry: async (entry: Entry, entryId: number) => false,
     deleteProgram: async (programId: number) => false,
     deleteEntry: async (entryId: number) => false
@@ -76,7 +76,7 @@ const TimesheetProvider = (props: Props) => {
     const [jwt, setJwt] = useState('');
     const [admin, setAdmin] = useState(false);
     const [userId, setUserId] = useState(0);
-    const [programs, setPrograms] = useState([] as object[]);
+    const [programs, setPrograms] = useState([] as Program[]);
     const [entries, setEntries] = useState([] as Entry[]);
     const [username, setUsername] = useState('');
 
@@ -181,7 +181,7 @@ const TimesheetProvider = (props: Props) => {
         }
     }
 
-    const createProgram = async(program:object) => {
+    const createProgram = async(program:Program) => {
         try {
             const url = serverUrl + '/api/programs';
             const response = await server.post(url, program);
@@ -193,19 +193,20 @@ const TimesheetProvider = (props: Props) => {
         }
     }
 
-    const createEntry = async(entry:Entry) => {
+    const createEntry = async(entry:NewEntry) => {
         try {
             const url = serverUrl + '/api/timesheetEntries';
             const response = await server.post(url, entry);
+            console.log(response);
+            await getEntries(userId);
             return true;
-            // re fetch entries
         } catch(error) {
             console.error('Error creating entry:', error);
             return false;
         }
     }
 
-    const updateProgram = async(program:object, programId:number) => {
+    const updateProgram = async(program:Program, programId:number) => {
         try {   
             const url = serverUrl + `/api/programs/${programId}`;
             const response = await server.put(url, program);
