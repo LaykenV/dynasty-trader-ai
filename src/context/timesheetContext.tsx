@@ -218,12 +218,12 @@ const TimesheetProvider = (props: Props) => {
         }
     }
 
-    const updateEntry = async(entry:Entry, entryId:number) => {
+    const updateEntry = async(entry:NewEntry, entryId:number) => {
         try {
             const url = serverUrl + `/api/timesheetEntries/${entryId}`;
-            const response = await server.post(url, entry);
+            const response = await server.put(url, entry);
+            await getEntries(userId);
             return true;
-            // re fetch entries
         } catch(error) {
             console.error('Error updating entry:', error);
             return false;
