@@ -6,9 +6,11 @@ import { LoginObj } from "../components/loginForm";
 import { RegisterObj } from "../components/registerForm";
 import { Entry, NewEntry, Program } from "../pages/dashboard";
 
+
 export interface TimesheetContextInterface {
     jwt: string,
     setJwt: Dispatch<SetStateAction<string>>,
+    userEmail: string,
     admin: boolean,
     setAdmin: Dispatch<SetStateAction<boolean>>,
     userId: number,
@@ -22,7 +24,7 @@ export interface TimesheetContextInterface {
     login: (user: LoginObj) => Promise<boolean>,
     register: (user: RegisterObj) => Promise<boolean>,
     getUser: () => Promise<boolean>,
-    updateUser: (userUpdate: object) => Promise<boolean>,
+    updateUser: (userUpdate: object, userId: number) => Promise<boolean>,
     getPrograms: () => Promise<boolean>,
     getEntries: (userId:number) => Promise<boolean>,
     createProgram: (program: Program) => Promise<boolean>,
@@ -36,6 +38,7 @@ export interface TimesheetContextInterface {
 const TimesheetContext = createContext<TimesheetContextInterface> ({
     jwt: '',
     setJwt: () => {},
+    userEmail: '',
     admin: false,
     setAdmin: () => {},
     userId: 0,
@@ -49,7 +52,7 @@ const TimesheetContext = createContext<TimesheetContextInterface> ({
     login: async (user: LoginObj) => false,
     register: async (user: RegisterObj) => false,
     getUser: async () => false,
-    updateUser: async (userUpdate: object) => false,
+    updateUser: async (userUpdate: object, userId: number) => false,
     getPrograms: async () => false,
     getEntries: async (userId:number) => false,
     createProgram: async (program: Program) => false,
@@ -79,6 +82,7 @@ const TimesheetProvider = (props: Props) => {
     const [programs, setPrograms] = useState([] as Program[]);
     const [entries, setEntries] = useState([] as Entry[]);
     const [username, setUsername] = useState('');
+    const [userEmail, setUserEmail] = useState('');
 
     useEffect(() => {
         if (jwt) {
@@ -109,6 +113,7 @@ const TimesheetProvider = (props: Props) => {
             const response = await server.post(url, user);
             console.log(response);
             setJwt(response.data.jwt);
+            setUserEmail(user.username);
             return true;
         } catch (error) {
             console.error('Error authenticating user:', error);
@@ -135,7 +140,7 @@ const TimesheetProvider = (props: Props) => {
 
     const getUser = async() => {
         try {
-            const url = serverUrl + `users/${userId}`;
+            const url = serverUrl + `/users/${userId}`;
             const response = await server.get(url);
             return true;
         } catch(error) {
@@ -144,12 +149,14 @@ const TimesheetProvider = (props: Props) => {
         }
     }
 
-    const updateUser = async(userUpdate:object) => {
+    const updateUser = async(userUpdate:object, userId:number) => {
         try {
-            const url = serverUrl + `users/${userId}`;
+            const url = serverUrl + `/users/${userId}`;
+            console.log(url);
+            
             const response = await server.put(url, userUpdate);
+            console.log(response);
             return true;
-            //update state if changed ?
         } catch(error) {
             console.error('Error updating user', error);
             return false;
@@ -255,7 +262,7 @@ const TimesheetProvider = (props: Props) => {
     }
 
     return(
-        <TimesheetContext.Provider value={{updateUser, updateEntry, updateProgram, deleteEntry, deleteProgram, getEntries, getPrograms, createEntry, createProgram, getUser, register, login, jwt, setJwt, admin, setAdmin, userId, setUserId, entries, setEntries, programs, setPrograms, username, setUsername}}>{props.children}</TimesheetContext.Provider>
+        <TimesheetContext.Provider value={{updateUser, userEmail, updateEntry, updateProgram, deleteEntry, deleteProgram, getEntries, getPrograms, createEntry, createProgram, getUser, register, login, jwt, setJwt, admin, setAdmin, userId, setUserId, entries, setEntries, programs, setPrograms, username, setUsername}}>{props.children}</TimesheetContext.Provider>
     )
 }
 

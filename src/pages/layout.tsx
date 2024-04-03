@@ -9,7 +9,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ( { children } ) => {
-    const {jwt, setJwt} = useContext(TimesheetContext);
+    const {jwt, setJwt, admin} = useContext(TimesheetContext);
     const navigate = useNavigate();
     const [pathname, setPathName] = useState('');
 
@@ -28,12 +28,17 @@ const Layout: React.FC<LayoutProps> = ( { children } ) => {
         
         return(
             <div style={{display:'flex'}}>
-                <div style={{display:'flex', flexDirection:'column', width:'256px', gap:'5px', height:'100vh'}}>
-                    <NavLink href="#required-for-focus" active={pathname == '/account' ? true : false} label='Account' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconFingerprint size='2rem' stroke={1.5}/>} onClick={() => {navigate('/account')}}></NavLink>
-                    <NavLink href="#required-for-focus" active={pathname == '/dashboard' ? true : false} label='Dashboard' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconActivity size='2rem' stroke={1.5}/>} onClick={() => {navigate('/dashboard')}}></NavLink>
+                <div style={{display:'flex', flexDirection:'column', width:'256px', gap:'5px', height:'100vh', justifyContent:'space-between', paddingTop:'30px', paddingBottom:'50px', backgroundColor: 'lightgray'}}>
+                    <div style={{display:'flex', justifyContent:'center', alignItems:'center'}}>Zyxware Timesheet App</div>
+                    <div>
+                        { admin ? <NavLink href="#required-for-focus" active={pathname == '/programs' ? true : false} label='Programs (Admin only)' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconFingerprint size='2rem' stroke={1.5}/>} onClick={() => {navigate('/programs')}}></NavLink> : null}
+                        <NavLink href="#required-for-focus" active={pathname == '/account' ? true : false} label='Account' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconFingerprint size='2rem' stroke={1.5}/>} onClick={() => {navigate('/account')}}></NavLink>
+                        <NavLink href="#required-for-focus" active={pathname == '/dashboard' ? true : false} label='Dashboard' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconActivity size='2rem' stroke={1.5}/>} onClick={() => {navigate('/dashboard')}}></NavLink>
+                    </div>
+                    <div></div>
                     <Button onClick={() => {signOut}} color="red">Sign Out</Button>
                 </div>
-                <div style={{flexGrow:1, backgroundColor: 'lightgray'}}>
+                <div style={{flexGrow:1}}>
                  {children}
                 </div>
             </div>

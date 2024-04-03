@@ -9,6 +9,7 @@ import '@mantine/dates/styles.css'
 import { MantineProvider } from '@mantine/core';
 import Layout from './pages/layout.tsx';
 import AccountPage from './pages/account.tsx';
+import Programs from './pages/programs.tsx';
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
   {
     path: '/account',
     element: <Layout><AccountPage></AccountPage></Layout>
+  },
+  {
+    path: '/programs',
+    element: <Layout><Programs></Programs></Layout>
   }
 ]);
 
