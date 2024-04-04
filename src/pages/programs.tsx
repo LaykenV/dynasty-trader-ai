@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { TimesheetContext } from "../context/timesheetContext";
 import { ScrollArea, Modal, Button, TextInput, Grid, Group, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { Program } from "./dashboard";
 
 export interface NewProgram {
   name: string;
@@ -12,7 +13,7 @@ const Programs = () => {
   const { admin, programs, getPrograms, updateProgram, deleteProgram, createProgram } = useContext(TimesheetContext);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [selectedProgram, setSelectedProgram] = useState<NewProgram | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
 
   const editForm = useForm({
     initialValues: {
@@ -30,7 +31,7 @@ const Programs = () => {
 
   const handleEditSubmit = (values: NewProgram) => {
     if (selectedProgram) {
-      updateProgram(selectedProgram.name, values);
+      updateProgram(values, selectedProgram.programId);
       setEditModalOpen(false);
       editForm.reset();
     }
@@ -52,7 +53,7 @@ const Programs = () => {
               <Grid.Col span={3}>{program.name}</Grid.Col>
               <Grid.Col span={6}>{program.description}</Grid.Col>
               <Grid.Col span={3}>
-                <Group position="right">
+                <Group justify="flex-start">
                   <Button
                     onClick={() => {
                       setSelectedProgram(program);
@@ -62,7 +63,7 @@ const Programs = () => {
                   >
                     Edit
                   </Button>
-                  <Button color="red" onClick={() => deleteProgram(program.name)}>
+                  <Button color="red" onClick={() => deleteProgram(program.programId)}>
                     Delete
                   </Button>
                 </Group>
