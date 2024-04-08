@@ -13,7 +13,7 @@ const LoginPage = () => {
         justifyContent: 'center', 
         alignItems: 'center', 
         border: '1px green solid', 
-        backgroundColor: 'lightgreen' // Active tab background
+        backgroundColor: 'lightgreen', // Active tab background
     };
     
     const inactiveTabStyle = {
@@ -22,11 +22,12 @@ const LoginPage = () => {
         justifyContent: 'center', 
         alignItems: 'center', 
         border: '1px green solid', 
-        backgroundColor: 'transparent' // Inactive tab background
+        backgroundColor: 'transparent',
+        cursor: 'pointer' // Inactive tab background
     };
 
     return(
-        <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'100vh', width:'100vw', flexDirection:'column'}}>
+        <div style={{display:'flex', justifyContent:'center', alignItems:'center', height:'70vh', width:'100vw', flexDirection:'column'}}>
             <div style={{fontSize:'xx-large', paddingBottom:'70px'}}>Zyxware Technologies Timesheet</div>
             <div style={{width:'600px', height: '350px', display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', border:'2px green solid'}}>
                 <div style={{height:'10%', display:'flex', width:'100%'}}>

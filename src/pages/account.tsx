@@ -45,7 +45,7 @@ const submitForm = async (values:updateUserObj) => {
                 <TextInput label='Username' value={username} size="lg" {...form.getInputProps('username')}/>
             </div>
             <div style={{width:'50%', height:'5%', display:'flex', justifyContent:'center', alignItems:'center'}}>
-                <Chip checked={form.values.role} onChange={() => form.setValues({role:!admin})}>I am an Administrator</Chip>
+                <Chip checked={form.values.role} onChange={() => form.setValues({role:!form.values.role})}>I am an Administrator</Chip>
             </div>
             <div style={{width:'50%', height:'20%', display:'flex', justifyContent:'center', alignItems:'center'}}>
                 <Button type="submit">Update User Info</Button>

@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { TimesheetContext } from "../context/timesheetContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Button, NavLink } from "@mantine/core";
-import { IconFingerprint, IconActivity, IconChevronRight} from '@tabler/icons-react';
+import { IconFingerprint, IconActivity, IconChevronRight, IconPackage} from '@tabler/icons-react';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -28,17 +28,17 @@ const Layout: React.FC<LayoutProps> = ( { children } ) => {
         
         return(
             <div style={{display:'flex'}}>
-                <div style={{display:'flex', flexDirection:'column', width:'256px', gap:'5px', height:'100vh', justifyContent:'space-between', paddingTop:'30px', paddingBottom:'50px', backgroundColor: 'lightgray'}}>
-                    <div style={{display:'flex', justifyContent:'center', alignItems:'center'}}>Zyxware Timesheet App</div>
-                    <div>
-                        { admin ? <NavLink href="#required-for-focus" active={pathname == '/programs' ? true : false} label='Programs (Admin only)' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconFingerprint size='2rem' stroke={1.5}/>} onClick={() => {navigate('/programs')}}></NavLink> : null}
+                <div style={{display:'flex', flexDirection:'column', width:'256px', gap:'5px', height:'100vh', justifyContent:'space-between', paddingTop:'30px', paddingBottom:'30px', backgroundColor: 'white'}}>
+                    <h4 style={{display:'flex', justifyContent:'center', alignItems:'center'}}>Zyxware Timesheet App</h4>
+                    <div style={{height:'20%', display:'flex', flexDirection:'column', justifyContent: 'space-around'}}>
+                        { admin ? <NavLink href="#required-for-focus" active={pathname == '/programs' ? true : false} label='Programs (Admin only)' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconPackage size='2rem' stroke={1.5}/>} onClick={() => {navigate('/programs')}}></NavLink> : null}
                         <NavLink href="#required-for-focus" active={pathname == '/account' ? true : false} label='Account' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconFingerprint size='2rem' stroke={1.5}/>} onClick={() => {navigate('/account')}}></NavLink>
                         <NavLink href="#required-for-focus" active={pathname == '/dashboard' ? true : false} label='Dashboard' rightSection={<IconChevronRight size='2rem' stroke={1.5}/>} leftSection={<IconActivity size='2rem' stroke={1.5}/>} onClick={() => {navigate('/dashboard')}}></NavLink>
                     </div>
                     <div></div>
-                    <Button onClick={() => {signOut}} color="red">Sign Out</Button>
+                    <Button onClick={() => signOut()} color="red">Sign Out</Button>
                 </div>
-                <div style={{flexGrow:1}}>
+                <div style={{flexGrow:1, backgroundColor:'#1b1b1b', color:'white'}}>
                  {children}
                 </div>
             </div>

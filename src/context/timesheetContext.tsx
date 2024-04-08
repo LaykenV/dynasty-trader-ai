@@ -241,9 +241,9 @@ const TimesheetProvider = (props: Props) => {
     const deleteEntry = async(entryId:number) => {
         try {
             const url = serverUrl + `/api/timesheetEntries/${entryId}`;
-            const response = await server.delete(url)
+            const response = await server.delete(url);
+            await getEntries(userId);
             return true;
-            //refetch
         } catch(error) {
             console.error('Error deleting entry:', error);
             return false;
